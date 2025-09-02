@@ -358,6 +358,90 @@
             // Inicializar vista
             renderHistory();
         });
+        
+        // --- CALCULADORA DE DIVISAS ---
+            (function currencyConverterLogic() {
+                const amountInput = document.getElementById('currency-amount');
+                const fromSelect = document.getElementById('from-currency');
+                const toSelect = document.getElementById('to-currency');
+                const swapBtn = document.getElementById('swap-currency');
+                const resultEl = document.getElementById('currency-result');
+                const rateInfoEl = document.getElementById('currency-rate-info');
+
+                let rates = {};
+                // FIX: Switched to a more complete and reliable API that includes COP
+                const API_URL = 'https://open.er-api.com/v6/latest/USD';
+
+                async function fetchRates() {
+                    try {
+                        const response = await fetch(API_URL);
+                        if (!response.ok) throw new Error('La respuesta de la red no fue correcta.');
+                        const data = await response.json();
+                        
+                        // FIX: Adapted logic for the new API's response structure
+                        if (data && data.result === 'success' && data.rates) {
+                            rates = data.rates;
+                            populateSelectors();
+                            convertCurrency();
+                        } else {
+                            throw new Error('Formato de respuesta de API inválido.');
+                        }
+                    } catch (error) {
+                        console.error("Error al obtener las tasas:", error);
+                        rateInfoEl.textContent = 'No se pudieron cargar las tasas.';
+                        resultEl.textContent = 'Error';
+                    }
+                }
+
+                function populateSelectors() {
+                    const currencies = Object.keys(rates).sort();
+                    const fragment = document.createDocumentFragment();
+                    currencies.forEach(currency => {
+                        const option = document.createElement('option');
+                        option.value = currency;
+                        option.textContent = currency;
+                        fragment.appendChild(option);
+                    });
+                    fromSelect.innerHTML = '';
+                    toSelect.innerHTML = '';
+                    fromSelect.appendChild(fragment.cloneNode(true));
+                    toSelect.appendChild(fragment);
+
+                    // Valores por defecto, incluyendo COP
+                    fromSelect.value = 'USD';
+                    toSelect.value = 'COP';
+                }
+
+                function convertCurrency() {
+                    const amount = parseFloat(amountInput.value) || 1;
+                    const fromCurrency = fromSelect.value;
+                    const toCurrency = toSelect.value;
+                    
+                    // The base currency is now USD, so direct conversion is simpler
+                    if (!rates[fromCurrency] || !rates[toCurrency]) return;
+
+                    const rateInUSD = 1 / rates[fromCurrency];
+                    const result = amount * rateInUSD * rates[toCurrency];
+                    
+                    const toFormatted = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(result);
+                    const singleUnitRate = (1 / rates[fromCurrency]) * rates[toCurrency];
+
+                    resultEl.textContent = `${toFormatted} ${toCurrency}`;
+                    rateInfoEl.textContent = `1 ${fromCurrency} = ${singleUnitRate.toFixed(4)} ${toCurrency}`;
+                }
+
+                amountInput.addEventListener('input', convertCurrency);
+                fromSelect.addEventListener('change', convertCurrency);
+                toSelect.addEventListener('change', convertCurrency);
+                
+                swapBtn.addEventListener('click', () => {
+                    [fromSelect.value, toSelect.value] = [toSelect.value, fromSelect.value];
+                    convertCurrency();
+                });
+                
+                fetchRates();
+            })();
+           
     </script>
 </body>
 </html>
