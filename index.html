@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Porcentajes</title>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
-    </script>
+    <title>Calculadora Multifunción</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,77 +14,71 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Configuración del tema oscuro */
-        .dark .dark-mode-gradient {
-            background: linear-gradient(180deg, rgba(17, 24, 39, 0) 0%, rgba(17, 24, 39, 1) 100%);
-        }
-        .light .light-mode-gradient {
-            background: linear-gradient(180deg, rgba(243, 244, 246, 0) 0%, rgba(243, 244, 246, 1) 100%);
-        }
-
-        /* Animación para la aparición del resultado */
-        @keyframes result-pop {
+        /* Animación para la aparición de elementos */
+        @keyframes pop-in {
             0% { transform: scale(0.95); opacity: 0; }
-            50% { transform: scale(1.05); opacity: 0.7; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .result-pop-animation {
-            animation: result-pop 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        .pop-in-animation {
+            animation: pop-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
         }
 
         /* Animación para la entrada de elementos del historial */
         @keyframes history-slide-in {
-            0% {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
         .history-item-enter {
             animation: history-slide-in 0.4s ease-out forwards;
         }
+        
+        /* Animaciones de transición de pestañas */
+        @keyframes slide-out-to-left {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-25px); opacity: 0; }
+        }
+        @keyframes slide-in-from-right {
+            from { transform: translateX(25px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .is-exiting {
+            animation: slide-out-to-left 0.3s ease-in-out forwards;
+        }
+        .is-entering {
+            animation: slide-in-from-right 0.3s ease-in-out forwards;
+        }
 
         /* Estilo para el input de rango personalizado */
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #4f46e5; /* indigo-600 */
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background 0.2s ease-in-out;
+            -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #4f46e5; border-radius: 50%; cursor: pointer; transition: background 0.2s ease-in-out;
         }
-
         input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #4f46e5; /* indigo-600 */
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background 0.2s ease-in-out;
+            width: 20px; height: 20px; background: #4f46e5; border-radius: 50%; cursor: pointer; transition: background 0.2s ease-in-out;
         }
-        
-        .dark input[type="range"]::-webkit-slider-thumb {
-             background: #818cf8; /* indigo-400 */
-        }
-        .dark input[type="range"]::-moz-range-thumb {
-            background: #818cf8; /* indigo-400 */
-        }
+        .dark input[type="range"]::-webkit-slider-thumb { background: #818cf8; }
+        .dark input[type="range"]::-moz-range-thumb { background: #818cf8; }
 
+        /* Estilos para el botón de porcentaje activo */
+        .percent-btn-active { background-color: #4f46e5 !important; color: white !important; }
+        .dark .percent-btn-active { background-color: #818cf8 !important; color: #1f2937 !important; }
+
+        /* Estilos para las pestañas */
+        .tab-btn-active {
+            color: #4f46e5 !important;
+            border-bottom-color: #4f46e5 !important;
+        }
+        .dark .tab-btn-active {
+            color: #818cf8 !important;
+            border-bottom-color: #818cf8 !important;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-500">
 
     <div class="min-h-screen flex flex-col items-center justify-center p-4">
         
-        <!-- Contenedor principal -->
-        <main class="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-gray-500/10 dark:shadow-black/20 p-6 md:p-8 space-y-8 transition-colors duration-500">
+        <main class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl shadow-gray-500/10 dark:shadow-black/20 p-6 md:p-8 space-y-6 transition-colors duration-500">
 
-            <!-- Encabezado con título y conmutador de tema -->
             <header class="flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Calculadora<span class="text-indigo-500 dark:text-indigo-400">.</span></h1>
                 <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
@@ -98,268 +87,270 @@
                 </button>
             </header>
 
-            <!-- Sección de la calculadora -->
-            <section class="space-y-6">
-                <!-- Input del monto -->
-                <div>
-                    <label for="amount" class="text-sm font-medium text-gray-600 dark:text-gray-400">Monto total</label>
-                    <div class="relative mt-1">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">$</span>
-                        <input type="number" id="amount" placeholder="0.00" class="w-full pl-7 pr-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl transition-all duration-300 text-lg font-semibold focus:ring-0">
-                    </div>
+            <!-- Pestañas de navegación -->
+            <nav class="border-b border-gray-200 dark:border-gray-700">
+                <div class="flex -mb-px space-x-6">
+                    <button id="tab-percentage" class="tab-btn py-3 px-1 border-b-2 font-semibold text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Porcentaje</button>
+                    <button id="tab-currency" class="tab-btn py-3 px-1 border-b-2 font-semibold text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Divisas</button>
+                </div>
+            </nav>
+
+            <!-- Contenedor de las calculadoras -->
+            <div id="calculators-container">
+
+                <!-- Calculadora de Porcentaje (existente) -->
+                <div id="percentage-calculator" class="space-y-6">
+                    <section class="space-y-6">
+                        <div>
+                            <label for="amount" class="text-sm font-medium text-gray-600 dark:text-gray-400">Monto total</label>
+                            <div class="relative mt-1">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">$</span>
+                                <input type="number" id="amount" placeholder="0.00" class="w-full pl-7 pr-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl transition-all duration-300 text-lg font-semibold focus:ring-0">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Seleccionar porcentaje</label>
+                            <div class="grid grid-cols-3 gap-3 mt-2">
+                                <button class="percent-btn py-3 px-4 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all duration-300" data-percent="5">5%</button>
+                                <button class="percent-btn py-3 px-4 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all duration-300" data-percent="10">10%</button>
+                                <button class="percent-btn py-3 px-4 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all duration-300" data-percent="15">15%</button>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center">
+                                 <label for="custom-percent-slider" class="text-sm font-medium text-gray-600 dark:text-gray-400">Personalizado</label>
+                                 <input type="number" id="custom-percent-input" class="w-20 text-center font-bold text-indigo-500 dark:text-indigo-400 bg-transparent border-0 focus:ring-0 p-0" value="20">
+                            </div>
+                            <input type="range" id="custom-percent-slider" min="0" max="100" value="20" class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer mt-2">
+                        </div>
+                    </section>
+                    <section id="result-section" class="bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl p-6 text-center space-y-2 opacity-0 transform scale-95">
+                        <div>
+                            <p class="text-sm font-medium text-indigo-200">Monto del Porcentaje</p>
+                            <p id="percent-amount" class="text-4xl font-bold tracking-tight">--</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-indigo-200">Total con Porcentaje</p>
+                            <p id="total-amount" class="text-2xl font-semibold">--</p>
+                        </div>
+                    </section>
+                    <section class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold">Historial</h2>
+                            <button id="clear-history" class="text-sm font-semibold text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors duration-300 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Limpiar
+                            </button>
+                        </div>
+                        <div id="history-list" class="max-h-40 overflow-y-auto space-y-3 pr-2 relative">
+                             <p id="history-placeholder" class="text-center text-gray-500 dark:text-gray-400 py-4">No hay cálculos todavía.</p>
+                        </div>
+                    </section>
                 </div>
 
-                <!-- Botones de porcentaje predefinido -->
-                <div>
-                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Seleccionar porcentaje</label>
-                    <div class="grid grid-cols-3 gap-3 mt-2">
-                        <button class="percent-btn py-3 px-4 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-all duration-300" data-percent="5">5%</button>
-                        <button class="percent-btn py-3 px-4 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-all duration-300" data-percent="10">10%</button>
-                        <button class="percent-btn py-3 px-4 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-all duration-300" data-percent="15">15%</button>
-                    </div>
+                <!-- Calculadora de Divisas (nueva) -->
+                <div id="currency-calculator" class="hidden space-y-6">
+                     <section class="space-y-6">
+                        <div>
+                            <label for="currency-amount" class="text-sm font-medium text-gray-600 dark:text-gray-400">Monto a convertir</label>
+                             <input type="number" id="currency-amount" placeholder="1.00" class="w-full mt-1 px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl transition-all duration-300 text-lg font-semibold focus:ring-0">
+                        </div>
+                        <div class="flex items-center justify-between space-x-2">
+                             <div class="w-full">
+                                <label for="from-currency" class="text-sm font-medium text-gray-600 dark:text-gray-400">De</label>
+                                <select id="from-currency" class="w-full mt-1 p-3 bg-gray-100 dark:bg-gray-700 border-transparent rounded-xl focus:border-indigo-500 focus:ring-indigo-500 transition"></select>
+                            </div>
+                            <button id="swap-currency" class="mt-6 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                                <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                            </button>
+                            <div class="w-full">
+                                <label for="to-currency" class="text-sm font-medium text-gray-600 dark:text-gray-400">A</label>
+                                <select id="to-currency" class="w-full mt-1 p-3 bg-gray-100 dark:bg-gray-700 border-transparent rounded-xl focus:border-indigo-500 focus:ring-indigo-500 transition"></select>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="currency-result-section" class="bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl p-6 text-center transition-all duration-500">
+                         <p id="currency-rate-info" class="text-sm font-medium text-indigo-200 mb-2">Cargando tasas...</p>
+                         <p id="currency-result" class="text-4xl font-bold tracking-tight">--</p>
+                    </section>
                 </div>
-
-                <!-- Input de porcentaje personalizado -->
-                <div>
-                    <div class="flex justify-between items-center">
-                         <label for="custom-percent-slider" class="text-sm font-medium text-gray-600 dark:text-gray-400">Personalizado</label>
-                         <input type="number" id="custom-percent-input" class="w-20 text-center font-bold text-indigo-500 dark:text-indigo-400 bg-transparent border-0 focus:ring-0 p-0" value="20">
-                    </div>
-                    <input type="range" id="custom-percent-slider" min="0" max="100" value="20" class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer mt-2">
-                </div>
-            </section>
-
-            <!-- Sección de resultados -->
-            <section id="result-section" class="bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl p-6 text-center space-y-2 transition-all duration-500 opacity-0 transform scale-95">
-                <div>
-                    <p class="text-sm font-medium text-indigo-200">Monto del Porcentaje</p>
-                    <p id="percent-amount" class="text-4xl font-bold tracking-tight">--</p>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-indigo-200">Total con Porcentaje</p>
-                    <p id="total-amount" class="text-2xl font-semibold">--</p>
-                </div>
-            </section>
-
-            <!-- Sección del historial -->
-            <section class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-bold">Historial</h2>
-                    <button id="clear-history" class="text-sm font-semibold text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors duration-300 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        Limpiar
-                    </button>
-                </div>
-                <div id="history-list" class="max-h-40 overflow-y-auto space-y-3 pr-2 relative">
-                    <!-- Los elementos del historial se insertarán aquí -->
-                     <p id="history-placeholder" class="text-center text-gray-500 dark:text-gray-400 py-4">No hay cálculos todavía.</p>
-                </div>
-            </section>
-
+            </div>
         </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Elementos del DOM
+            // --- ELEMENTOS GLOBALES ---
             const themeToggle = document.getElementById('theme-toggle');
             const lightIcon = document.getElementById('theme-icon-light');
             const darkIcon = document.getElementById('theme-icon-dark');
-            const amountInput = document.getElementById('amount');
-            const percentBtns = document.querySelectorAll('.percent-btn');
-            const customPercentSlider = document.getElementById('custom-percent-slider');
-            const customPercentInput = document.getElementById('custom-percent-input');
-            const resultSection = document.getElementById('result-section');
-            const percentAmountEl = document.getElementById('percent-amount');
-            const totalAmountEl = document.getElementById('total-amount');
-            const historyList = document.getElementById('history-list');
-            const historyPlaceholder = document.getElementById('history-placeholder');
-            const clearHistoryBtn = document.getElementById('clear-history');
-
-            let currentPercent = null;
-            let history = JSON.parse(localStorage.getItem('percentHistory')) || [];
+            const tabPercentage = document.getElementById('tab-percentage');
+            const tabCurrency = document.getElementById('tab-currency');
+            const percentageCalculator = document.getElementById('percentage-calculator');
+            const currencyCalculator = document.getElementById('currency-calculator');
 
             // --- Lógica del Tema ---
             const setTheme = (isDark) => {
-                // Guarda la preferencia en el almacenamiento local
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                
-                // Aplica o remueve la clase 'dark' del elemento HTML
                 document.documentElement.classList.toggle('dark', isDark);
-
-                // Muestra el ícono correspondiente al tema
-                lightIcon.classList.toggle('hidden', !isDark); // Muestra el sol (lightIcon) si es oscuro
-                darkIcon.classList.toggle('hidden', isDark);   // Muestra la luna (darkIcon) si es claro
+                lightIcon.classList.toggle('hidden', !isDark);
+                darkIcon.classList.toggle('hidden', isDark);
             };
-
-            // Listener para el botón de cambiar tema
-            themeToggle.addEventListener('click', () => {
-                // Comprueba si el tema actual es oscuro y lo invierte
-                const isCurrentlyDark = document.documentElement.classList.contains('dark');
-                setTheme(!isCurrentlyDark);
-            });
-            
-            // Cargar el tema inicial al cargar la página
+            themeToggle.addEventListener('click', () => setTheme(!document.documentElement.classList.contains('dark')));
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const savedTheme = localStorage.getItem('theme');
-            // Determina si el tema inicial debe ser oscuro
-            const initialIsDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
-            setTheme(initialIsDark);
+            setTheme(savedTheme === 'dark' || (savedTheme === null && prefersDark));
 
+            // --- Lógica de Pestañas ---
+            let activeTabId = 'percentage';
+            let isTabSwitching = false;
 
-            // --- Lógica de la Calculadora ---
-            const formatCurrency = (value) => {
-                return new Intl.NumberFormat('es-CO', {
-                    style: 'currency',
-                    currency: 'COP',
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }).format(value);
-            };
+            const switchTab = (newTabId) => {
+                if (newTabId === activeTabId || isTabSwitching) return;
+                isTabSwitching = true;
 
-            const calculate = (saveToHistory = false) => {
-                const amount = parseFloat(amountInput.value);
-                if (isNaN(amount) || amount <= 0 || currentPercent === null) {
-                    resultSection.classList.add('opacity-0', 'scale-95');
-                    return;
-                }
+                const oldTabBtn = document.getElementById(`tab-${activeTabId}`);
+                const newTabBtn = document.getElementById(`tab-${newTabId}`);
+                const oldPanel = document.getElementById(`${activeTabId}-calculator`);
+                const newPanel = document.getElementById(`${newTabId}-calculator`);
 
-                const percentValue = parseFloat(currentPercent);
-                const percentage = (amount * percentValue) / 100;
-                const total = amount + percentage;
+                oldTabBtn.classList.remove('tab-btn-active');
+                newTabBtn.classList.add('tab-btn-active');
 
-                percentAmountEl.textContent = formatCurrency(percentage);
-                totalAmountEl.textContent = formatCurrency(total);
-
-                // Mostrar resultado con animación
-                if (resultSection.classList.contains('opacity-0')) {
-                    resultSection.classList.remove('opacity-0', 'scale-95');
-                    resultSection.classList.add('result-pop-animation');
-                    resultSection.addEventListener('animationend', () => {
-                        resultSection.classList.remove('result-pop-animation');
+                oldPanel.classList.add('is-exiting');
+                oldPanel.addEventListener('animationend', () => {
+                    oldPanel.classList.remove('is-exiting');
+                    oldPanel.classList.add('hidden');
+                    
+                    newPanel.classList.remove('hidden');
+                    newPanel.classList.add('is-entering');
+                    
+                    newPanel.addEventListener('animationend', () => {
+                        newPanel.classList.remove('is-entering');
+                        activeTabId = newTabId;
+                        isTabSwitching = false;
                     }, { once: true });
-                }
-                
-                // Agregar al historial solo si se indica
-                if (saveToHistory) {
-                    addToHistory({
-                        amount,
-                        percent: percentValue,
-                        percentage,
-                        total
+                }, { once: true });
+            };
+
+            tabPercentage.addEventListener('click', () => switchTab('percentage'));
+            tabCurrency.addEventListener('click', () => switchTab('currency'));
+
+            // Establecer pestaña inicial sin animación
+            document.getElementById('tab-percentage').classList.add('tab-btn-active');
+            document.getElementById('percentage-calculator').classList.remove('hidden');
+            document.getElementById('currency-calculator').classList.add('hidden');
+
+
+            // --- CALCULADORA DE PORCENTAJE ---
+            (function percentageCalculatorLogic() {
+                const amountInput = document.getElementById('amount');
+                const percentBtns = document.querySelectorAll('.percent-btn');
+                const customPercentSlider = document.getElementById('custom-percent-slider');
+                const customPercentInput = document.getElementById('custom-percent-input');
+                const resultSection = document.getElementById('result-section');
+                const percentAmountEl = document.getElementById('percent-amount');
+                const totalAmountEl = document.getElementById('total-amount');
+                const historyList = document.getElementById('history-list');
+                const historyPlaceholder = document.getElementById('history-placeholder');
+                const clearHistoryBtn = document.getElementById('clear-history');
+                let currentPercent = null;
+                let history = JSON.parse(localStorage.getItem('percentHistory')) || [];
+
+                const formatCurrency = (value) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+
+                const calculate = (saveToHistory = false) => {
+                    const amount = parseFloat(amountInput.value);
+                    if (isNaN(amount) || amount <= 0 || currentPercent === null) {
+                        resultSection.classList.add('opacity-0', 'scale-95');
+                        return;
+                    }
+                    const percentValue = parseFloat(currentPercent);
+                    const percentage = (amount * percentValue) / 100;
+                    const total = amount + percentage;
+                    percentAmountEl.textContent = formatCurrency(percentage);
+                    totalAmountEl.textContent = formatCurrency(total);
+                    if (resultSection.classList.contains('opacity-0')) {
+                        resultSection.classList.remove('opacity-0', 'scale-95');
+                        resultSection.classList.add('pop-in-animation');
+                        resultSection.addEventListener('animationend', () => resultSection.classList.remove('pop-in-animation'), { once: true });
+                    }
+                    if (saveToHistory) addToHistory({ amount, percent: percentValue, percentage, total });
+                };
+
+                const setActiveButton = (selectedBtn) => {
+                    percentBtns.forEach(btn => btn.classList.remove('percent-btn-active'));
+                    if (selectedBtn) selectedBtn.classList.add('percent-btn-active');
+                };
+
+                amountInput.addEventListener('input', () => calculate(false));
+                amountInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); calculate(true); } });
+
+                percentBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        currentPercent = btn.dataset.percent;
+                        setActiveButton(btn);
+                        customPercentSlider.value = currentPercent;
+                        customPercentInput.value = currentPercent;
+                        calculate(false);
                     });
-                }
-            };
+                });
 
-            const setActiveButton = (selectedBtn) => {
-                 percentBtns.forEach(btn => {
-                    btn.classList.remove('bg-indigo-500', 'text-white', 'dark:bg-indigo-400', 'dark:text-gray-900');
-                    btn.classList.add('bg-gray-100', 'dark:bg-gray-700');
-                 });
-                 if(selectedBtn){
-                    selectedBtn.classList.add('bg-indigo-500', 'text-white', 'dark:bg-indigo-400', 'dark:text-gray-900');
-                    selectedBtn.classList.remove('bg-gray-100', 'dark:bg-gray-700');
-                 }
-            };
-
-            amountInput.addEventListener('input', () => calculate(false));
-
-            amountInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Evita el comportamiento por defecto del Enter
-                    calculate(true); // Calcula y guarda en el historial
-                }
-            });
-
-            percentBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    currentPercent = btn.dataset.percent;
-                    setActiveButton(btn);
-                    customPercentSlider.value = currentPercent;
+                customPercentSlider.addEventListener('input', (e) => {
+                    currentPercent = e.target.value;
                     customPercentInput.value = currentPercent;
+                    setActiveButton(null);
                     calculate(false);
                 });
-            });
-
-            customPercentSlider.addEventListener('input', (e) => {
-                currentPercent = e.target.value;
-                customPercentInput.value = currentPercent;
-                setActiveButton(null);
-                calculate(false);
-            });
-            
-            customPercentInput.addEventListener('input', (e) => {
-                let value = parseInt(e.target.value);
-                if (isNaN(value)) value = 0;
-                if (value > 100) value = 100;
-                if (value < 0) value = 0;
                 
-                e.target.value = value;
-                currentPercent = value;
-                customPercentSlider.value = value;
-                setActiveButton(null);
-                calculate(false);
-            });
+                customPercentInput.addEventListener('input', (e) => {
+                    let value = parseInt(e.target.value) || 0;
+                    value = Math.max(0, Math.min(100, value));
+                    e.target.value = value;
+                    currentPercent = value;
+                    customPercentSlider.value = value;
+                    setActiveButton(null);
+                    calculate(false);
+                });
 
+                const renderHistory = () => {
+                    historyList.innerHTML = '';
+                    if (history.length === 0) {
+                        historyList.appendChild(historyPlaceholder);
+                        historyPlaceholder.style.display = 'block';
+                        clearHistoryBtn.disabled = true;
+                    } else {
+                        historyPlaceholder.style.display = 'none';
+                        clearHistoryBtn.disabled = false;
+                        history.forEach((item, index) => {
+                            const li = document.createElement('div');
+                            li.className = 'p-3 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm';
+                            li.innerHTML = `&lt;div class="flex justify-between font-semibold"&gt;&lt;span&gt;${item.percent}% de ${formatCurrency(item.amount)}&lt;/span&gt;&lt;span class="text-indigo-500 dark:text-indigo-400"&gt;${formatCurrency(item.percentage)}&lt;/span&gt;&lt;/div&gt;&lt;div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1"&gt;&lt;span&gt;Total:&lt;/span&gt;&lt;span&gt;${formatCurrency(item.total)}&lt;/span&gt;&lt;/div&gt;`;
+                            if (index === history.length - 1) li.classList.add('history-item-enter');
+                            historyList.prepend(li);
+                        });
+                    }
+                };
 
-            // --- Lógica del Historial ---
-            const renderHistory = () => {
-                historyList.innerHTML = '';
-                if (history.length === 0) {
-                    historyList.appendChild(historyPlaceholder);
-                    historyPlaceholder.style.display = 'block';
-                    clearHistoryBtn.disabled = true;
-                } else {
-                    historyPlaceholder.style.display = 'none';
-                    clearHistoryBtn.disabled = false;
-                    history.forEach((item, index) => {
-                        const li = document.createElement('div');
-                        li.classList.add('p-3', 'bg-gray-100', 'dark:bg-gray-700', 'rounded-lg', 'text-sm');
-                        li.innerHTML = `
-                            <div class="flex justify-between font-semibold">
-                                <span>${item.percent}% de ${formatCurrency(item.amount)}</span>
-                                <span class="text-indigo-500 dark:text-indigo-400">${formatCurrency(item.percentage)}</span>
-                            </div>
-                            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                <span>Total:</span>
-                                <span>${formatCurrency(item.total)}</span>
-                            </div>
-                        `;
-                        // Añadir animación solo si es el último elemento
-                        if (index === history.length - 1) {
-                           li.classList.add('history-item-enter');
-                        }
-                        historyList.prepend(li);
-                    });
-                }
-            };
-
-            const addToHistory = (calculation) => {
-                // Evitar duplicados rápidos
-                const lastEntry = history[history.length - 1];
-                if(lastEntry && lastEntry.amount === calculation.amount && lastEntry.percent === calculation.percent){
-                    return;
-                }
+                const addToHistory = (calculation) => {
+                    const lastEntry = history[history.length - 1];
+                    if (lastEntry && lastEntry.amount === calculation.amount && lastEntry.percent === calculation.percent) return;
+                    history.push(calculation);
+                    if (history.length > 20) history.shift();
+                    localStorage.setItem('percentHistory', JSON.stringify(history));
+                    renderHistory();
+                };
                 
-                history.push(calculation);
-                if(history.length > 20) { // Limitar el historial
-                    history.shift();
-                }
-                localStorage.setItem('percentHistory', JSON.stringify(history));
+                clearHistoryBtn.addEventListener('click', () => {
+                    history = [];
+                    localStorage.setItem('percentHistory', JSON.stringify(history));
+                    renderHistory();
+                });
+                
                 renderHistory();
-            };
-            
-            clearHistoryBtn.addEventListener('click', () => {
-                history = [];
-                localStorage.setItem('percentHistory', JSON.stringify(history));
-                renderHistory();
-            });
-            
-            // Inicializar vista
-            renderHistory();
-        });
-        
-        // --- CALCULADORA DE DIVISAS ---
+            })();
+
+            // --- CALCULADORA DE DIVISAS ---
             (function currencyConverterLogic() {
                 const amountInput = document.getElementById('currency-amount');
                 const fromSelect = document.getElementById('from-currency');
@@ -441,8 +432,7 @@
                 
                 fetchRates();
             })();
-           
+        });
     </script>
 </body>
 </html>
-
