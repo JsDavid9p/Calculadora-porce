@@ -71,11 +71,65 @@
             color: #818cf8 !important;
             border-bottom-color: #818cf8 !important;
         }
+
+        /* Estilos para la barra de título personalizada */
+        #title-bar {
+          -webkit-app-region: drag;
+          height: 40px; /* Aumenté un poco la altura para más comodidad */
+          width: 100%;
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 9999;
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          padding-right: 5px;
+        }
+
+        #title-bar-btns button {
+          -webkit-app-region: no-drag;
+          width: 40px;
+          height: 30px;
+          border: none;
+          background: transparent;
+          font-size: 16px;
+          color: #6b7280;
+          border-radius: 8px;
+          transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+        .dark #title-bar-btns button {
+            color: #9ca3af;
+        }
+
+        #title-bar-btns button:hover {
+          background: #e5e7eb;
+        }
+        .dark #title-bar-btns button:hover {
+            background: #374151;
+        }
+
+        #close-btn:hover {
+          background: #ef4444;
+          color: white;
+        }
+        .dark #close-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-500">
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div id="title-bar">
+      <div id="title-bar-btns">
+        <button id="minimize-btn" title="Minimizar">_</button>
+        <button id="close-btn" title="Cerrar">x</button>
+      </div>
+    </div>
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 pt-12"> <!-- Añadido pt-12 para dejar espacio para la barra de título -->
         
         <main class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl shadow-gray-500/10 dark:shadow-black/20 p-6 md:p-8 space-y-6 transition-colors duration-500">
 
@@ -434,5 +488,6 @@
             })();
         });
     </script>
+    <script src="renderer.js"></script>
 </body>
 </html>

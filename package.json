@@ -31,5 +31,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.3"
   }
 }
