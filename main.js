@@ -1,22 +1,37 @@
-const { app, BrowserWindow } = require('electron');
-const remoteMain = require('@electron/remote/main');
-
-remoteMain.initialize();
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
 
 function createWindow () {
   const win = new BrowserWindow({
     width: 500,
     height: 900,
-    frame: false, // Esto hace la ventana sin marco
+    frame: false,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
     }
   });
 
+  // Manejadores para acciones de ventana
+  ipcMain.on('minimize-app', () => {
+    win.minimize();
+  });
+
+  ipcMain.on('maximize-app', () => {
+    if (win.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win.maximize();
+    }
+  });
+
+  ipcMain.on('close-app', () => {
+    win.close();
+  });
+
   win.loadFile('index.html');
-  win.setMenu(null); // Esto elimina el menú
-  remoteMain.enable(win.webContents); // Habilita @electron/remote
+  win.setMenu(null);
 }
 
 app.whenReady().then(createWindow);
